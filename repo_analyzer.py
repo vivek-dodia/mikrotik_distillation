@@ -33,11 +33,38 @@ class RepoAnalyzer:
         self.config_patterns = {'.yml', '.yaml', '.json', '.toml', '.ini', '.cfg', '.conf'}
         
     def is_git_repo(self, path: Path) -> bool:
-        """Check if directory is a git repository."""
+        """Check if a directory is a Git repository.
+
+        This function determines whether the specified directory contains a
+        `.git` folder, which is indicative of a Git repository. It constructs
+        the path to the `.git` directory and checks for its existence.
+
+        Args:
+            path (Path): The path to the directory to check.
+
+        Returns:
+            bool: True if the directory is a Git repository, False otherwise.
+        """
         return (path / '.git').exists()
     
     def get_file_category(self, file_path: Path) -> str:
-        """Determine file category based on extension and path."""
+        """Determine the category of a file based on its extension and name.
+
+        This function analyzes the provided file path to determine its category.
+        It first checks for special file names such as 'README.md', 'LICENSE',
+        and 'CHANGELOG'. If none of these match, it then checks the file
+        extension against predefined patterns for documentation, code, test, and
+        configuration files. If the file does not match any known categories, it
+        defaults to 'other'.
+
+        Args:
+            file_path (Path): The path of the file to categorize.
+
+        Returns:
+            str: The category of the file, which can be one of
+                'readme', 'license', 'changelog', 'documentation',
+                'code', 'test', 'config', or 'other'.
+        """
         extension = file_path.suffix.lower()
         path_str = str(file_path).lower()
         
@@ -63,7 +90,34 @@ class RepoAnalyzer:
         return 'other'
     
     def analyze_repo(self, repo_path: Path) -> dict:
-        """Analyze a single repository."""
+        """Analyze a single repository.
+
+        This function inspects the specified repository to gather various
+        statistics, including the total number of files, total size of files,
+        types of files, categories of files, and whether the repository contains
+        documentation files, tests, and CI/CD configurations. It traverses the
+        repository directory, skipping any contents within the `.git` directory,
+        and aggregates the relevant information into a dictionary.
+
+        Args:
+            repo_path (Path): The path to the repository to be analyzed.
+
+        Returns:
+            dict: A dictionary containing statistics about the repository, including:
+                - total_files (int): The total number of files in the repository.
+                - total_size (int): The total size of all files in bytes.
+                - file_types (defaultdict): A dictionary mapping file extensions to
+                their counts.
+                - categories (defaultdict): A dictionary mapping file categories to
+                their counts.
+                - doc_files (list): A list of documentation file paths relative to the
+                repository.
+                - main_language (str or None): The primary programming language used in
+                the repository.
+                - has_tests (bool): Indicates if the repository contains test files.
+                - has_ci (bool): Indicates if the repository has CI/CD configuration
+                files.
+        """
         repo_stats = {
             'total_files': 0,
             'total_size': 0,
@@ -121,7 +175,16 @@ class RepoAnalyzer:
         return repo_stats
     
     def analyze_all_repos(self):
-        """Analyze all repositories in the base directory."""
+        """Analyze all repositories in the base directory.
+
+        This function traverses the base directory to identify and analyze all
+        Git repositories. It counts the total number of repositories, as well as
+        the number of successfully processed and failed repositories. For each
+        repository found, it logs the analysis process and attempts to gather
+        statistics. If the analysis fails for any repository, an error is
+        logged, and the failure count is incremented. Finally, a summary of the
+        analysis results is generated.
+        """
         total_repos = 0
         processed_repos = 0
         failed_repos = 0
@@ -148,7 +211,20 @@ class RepoAnalyzer:
         self.generate_summary(total_repos, processed_repos, failed_repos)
     
     def generate_summary(self, total_repos: int, processed_repos: int, failed_repos: int):
-        """Generate analysis summary."""
+        """Generate an analysis summary of repository statistics.
+
+        This method compiles a summary of the repository analysis, including the
+        total number of repositories, the number of processed and failed
+        repositories, and various aggregate statistics such as total files,
+        total size, and the distribution of programming languages used across
+        the repositories. The summary is then saved to a JSON file and logged
+        for review.
+
+        Args:
+            total_repos (int): The total number of repositories found.
+            processed_repos (int): The number of repositories successfully analyzed.
+            failed_repos (int): The number of repositories that failed to analyze.
+        """
         summary = {
             'total_repos': total_repos,
             'processed_repos': processed_repos,

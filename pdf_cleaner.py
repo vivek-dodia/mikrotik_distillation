@@ -16,7 +16,20 @@ logging.basicConfig(
 )
 
 def clean_code_block(text: str) -> str:
-    """Clean up code blocks while preserving structure."""
+    """Clean up code blocks while preserving structure.
+
+    This function takes a string containing code blocks and cleans it up by
+    removing unnecessary whitespace while preserving the original structure
+    of the code. It ensures that lines starting with specific prefixes are
+    retained as they are, and it formats the output as a proper markdown
+    code block if it is not already formatted.
+
+    Args:
+        text (str): The input string containing code blocks to be cleaned.
+
+    Returns:
+        str: The cleaned and properly formatted code block as a string.
+    """
     if not text.strip():
         return ""
     
@@ -38,7 +51,23 @@ def clean_code_block(text: str) -> str:
     return text
 
 def clean_property_table(text: str) -> str:
-    """Format property description tables."""
+    """Format property description tables.
+
+    This function takes a string containing property descriptions formatted
+    in a specific way, and cleans it up by organizing the properties and
+    their descriptions into a more readable format. It identifies new
+    property definitions based on the presence of parentheses and the
+    keyword 'Default:', and collects the associated descriptions. The
+    cleaned output is returned as a single string with properties bolded and
+    separated by new lines.
+
+    Args:
+        text (str): A string containing property descriptions, each potentially spanning
+            multiple lines.
+
+    Returns:
+        str: A formatted string with cleaned property descriptions.
+    """
     lines = text.split('\n')
     cleaned_lines = []
     current_property = []
@@ -67,10 +96,41 @@ def clean_property_table(text: str) -> str:
     return '\n'.join(cleaned_lines)
 
 def clean_text(content: str) -> str:
-    """Clean and format the documentation text."""
+    """Clean and format the documentation text.
+
+    This function processes the input documentation text by extracting code
+    blocks, cleaning up sections, and formatting property tables. It
+    identifies code blocks enclosed in triple backticks and replaces them
+    with placeholders. The function then splits the content into sections
+    based on headers, cleans each section by removing unnecessary
+    whitespace, and formats property tables if present. Finally, it restores
+    the original code blocks in their respective locations.
+
+    Args:
+        content (str): The documentation text to be cleaned and formatted.
+
+    Returns:
+        str: The cleaned and formatted documentation text.
+    """
     # Extract and save code blocks
     code_blocks = []
     def save_code_block(match):
+        """Save a code block from a regex match.
+
+        This function extracts a code block from a regex match object, strips
+        any leading or trailing whitespace, and appends it to a list of code
+        blocks. It returns a placeholder string that represents the index of the
+        saved code block. If the extracted code block is empty, it returns an
+        empty string.
+
+        Args:
+            match (re.Match): A regex match object containing the code block.
+
+        Returns:
+            str: A placeholder string for the saved code block or an empty string if no
+                code was found.
+        """
+
         code = match.group(1).strip()
         if code:
             code_blocks.append(code)
@@ -135,7 +195,20 @@ def clean_text(content: str) -> str:
     return content
 
 def process_file(input_file: str, output_file: str):
-    """Process a single documentation file."""
+    """Process a single documentation file.
+
+    This function reads the content of the specified input file, cleans the
+    text using a helper function, and writes the cleaned content to the
+    specified output file. It handles file operations and ensures that any
+    errors encountered during the process are logged.
+
+    Args:
+        input_file (str): The path to the input file that needs to be processed.
+        output_file (str): The path to the output file where cleaned content will be written.
+
+    Returns:
+        bool: True if the file was processed successfully, False otherwise.
+    """
     try:
         # Read input file
         with open(input_file, 'r', encoding='utf-8') as f:
@@ -154,7 +227,24 @@ def process_file(input_file: str, output_file: str):
         return False
 
 def process_directory(input_dir: str, output_dir: str):
-    """Process all markdown files in the directory."""
+    """Process all markdown files in the directory.
+
+    This function scans the specified input directory for all markdown files
+    and processes each file by cleaning its content. The cleaned files are
+    saved in the specified output directory with a prefix "cleaned_". It
+    logs the processing summary, including the total number of files
+    processed, the number of successfully cleaned files, and the number of
+    files that failed to process.
+
+    Args:
+        input_dir (str): The path to the input directory containing markdown files.
+        output_dir (str): The path to the output directory where cleaned files will be saved.
+
+    Returns:
+        tuple: A tuple containing two integers:
+            - The number of successfully cleaned files.
+            - The number of files that failed to process.
+    """
     input_path = Path(input_dir)
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)

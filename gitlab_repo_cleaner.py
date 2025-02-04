@@ -61,12 +61,38 @@ class MikroTikContentCleaner:
         }
 
     def get_file_hash(self, file_path: Path) -> str:
-        """Calculate hash of file content to identify duplicates."""
+        """Calculate the MD5 hash of the content of a file.
+
+        This function opens a file in binary mode, reads its content, and
+        computes the MD5 hash. The resulting hash can be used to identify
+        duplicate files based on their content.
+
+        Args:
+            file_path (Path): The path to the file for which the hash is to be calculated.
+
+        Returns:
+            str: The MD5 hash of the file content as a hexadecimal string.
+        """
         with open(file_path, 'rb') as f:
             return hashlib.md5(f.read()).hexdigest()
 
     def is_mikrotik_related(self, file_path: Path, content: str) -> bool:
-        """Check if file content is MikroTik-related."""
+        """Check if file content is MikroTik-related.
+
+        This function determines whether the provided file content or its
+        filename indicates a relation to MikroTik products. It checks for
+        specific patterns in the filename and the content of the file. If any of
+        the patterns are found, the function returns True; otherwise, it returns
+        False.
+
+        Args:
+            file_path (Path): The path of the file to check.
+            content (str): The content of the file as a string.
+
+        Returns:
+            bool: True if the file or its content is related to MikroTik,
+                False otherwise.
+        """
         # Check filename patterns
         if any(file_path.name.lower().find(pattern) != -1 
                for pattern in ['mikrotik', 'routeros', 'ros', 'winbox']):
@@ -77,7 +103,21 @@ class MikroTikContentCleaner:
                   for pattern in self.important_patterns)
 
     def categorize_content(self, content: str) -> List[str]:
-        """Determine categories for the content."""
+        """Determine categories for the given content based on predefined keywords.
+
+        This function analyzes the input content and assigns it to one or more
+        categories based on the presence of specific keywords. It checks each
+        category's keywords against the content (case insensitive) and returns a
+        list of matching categories. If no categories match, it defaults to
+        returning 'uncategorized'.
+
+        Args:
+            content (str): The content to be categorized.
+
+        Returns:
+            List[str]: A list of categories that match the content, or ['uncategorized']
+            if no matches are found.
+        """
         categories = []
         for category, keywords in self.categories.items():
             if any(keyword in content.lower() for keyword in keywords):
@@ -85,7 +125,16 @@ class MikroTikContentCleaner:
         return categories or ['uncategorized']
 
     def clean_and_organize_content(self):
-        """Main function to clean and organize MikroTik content."""
+        """Clean and organize MikroTik content from input directories.
+
+        This function processes each repository in the input directory, cleaning
+        and organizing MikroTik-related files into categorized output
+        directories. It creates a directory structure based on predefined
+        categories, reads the content of each file, checks for duplicates, and
+        saves the files in their respective categories. A summary of the
+        processing results, including the number of processed, duplicate, and
+        organized files, is generated and saved as a JSON file.
+        """
         processed_files = 0
         duplicate_files = 0
         organized_files = 0
